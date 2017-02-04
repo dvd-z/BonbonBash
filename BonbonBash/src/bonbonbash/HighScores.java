@@ -1,4 +1,4 @@
-package BonbonBash;
+package pkg2048;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -28,22 +28,21 @@ public class HighScores extends BasicGameState{
     private static StateBasedGame game;
     BufferedReader Read;
     BufferedWriter WriteFile;
-    TrueTypeFont font;
+    TrueTypeFont fontScore,fontName;
     
-    Image highScoresBackground,resetscoresConfirmation,enterNameText;
+    Image highscoresBackground,highscoresBackgroundReset,highscoresBackgroundName;
     
-    int c1=0,place=-1,keyPressDelay=0;
-    boolean resetscoresConfirmationOpen=false;
+    int c1=0,place=0,keyPressDelay=0;
+    boolean resetScoresConfirmation=false;
     String line="",name="";
     String[] nameSaved=new String[10];
-    
-    String mouse="";
+    int[] largestSaved=new int[10];
     
     @SuppressWarnings("empty-statement")
-    public HighScores(int stateID) throws SlickException, FileNotFoundException, IOException{
-        this.highScoresBackground=new Image("data\\images\\highScoresBackground.png");
-        this.resetscoresConfirmation=new Image("data\\images\\resetScoresConfirmation.png");
-        this.enterNameText=new Image("data\\images\\enterNameText.png");
+    public HighScores(int stateID) throws SlickException{
+        this.highscoresBackground=new Image("data\\highscoresBackground.png");
+        this.highscoresBackgroundReset=new Image("data\\highscoresBackgroundReset.png");
+        this.highscoresBackgroundName=new Image("data\\highscoresBackgroundName.png");
     }
     
     @Override
@@ -62,10 +61,13 @@ public class HighScores extends BasicGameState{
         
         // load font file
         try {
-            InputStream inputStream = ResourceLoader.getResourceAsStream("data\\VCR_OSD_MONO.ttf");
+            InputStream inputStream = ResourceLoader.getResourceAsStream("data\\Tahoma.ttf");
             Font awtFont=Font.createFont(Font.TRUETYPE_FONT, inputStream);
-            awtFont=awtFont.deriveFont(28f);
-            font=new TrueTypeFont(awtFont, false);
+            awtFont=awtFont.deriveFont(30f);
+            fontScore=new TrueTypeFont(awtFont,false);
+            awtFont=awtFont.deriveFont(40f);
+            fontName=new TrueTypeFont(awtFont,false);
+
         } catch (FontFormatException | IOException e) {
         }
         
@@ -79,7 +81,8 @@ public class HighScores extends BasicGameState{
             try {
                 line=Read.readLine();
                 nameSaved[c1]=line.substring(0,line.indexOf(","));
-                gv.scoreSaved[c1]=Integer.parseInt(line.substring(line.indexOf(",")+1,line.length()));
+                gv.scoreSaved[c1]=Integer.parseInt(line.substring(line.indexOf(",")+1,line.lastIndexOf(",")));
+                largestSaved[c1]=Integer.parseInt(line.substring(line.lastIndexOf(",")+1,line.length()));
             } catch (IOException ex) {
                 Logger.getLogger(HighScores.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -90,6 +93,7 @@ public class HighScores extends BasicGameState{
             Logger.getLogger(HighScores.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        // determines place in scores
         place=-1;
         if(gv.highScore==true){
             for(c1=0;c1<gv.scoreSaved.length;c1++){
@@ -105,20 +109,22 @@ public class HighScores extends BasicGameState{
 
     @Override
     public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
-        highScoresBackground.draw(0,0);
+        highscoresBackground.draw(0,0);
         
-        for(c1=0;c1<10;c1++){
-            font.drawString(378,129+39*c1,nameSaved[c1],Color.yellow);
-            font.drawString(545,129+39*c1,String.valueOf(gv.scoreSaved[c1]),Color.yellow);
-        }
-        
-        if(resetscoresConfirmationOpen==true&&gv.highScore==false){
-            resetscoresConfirmation.draw(25,85);
+        if(resetScoresConfirmation==true){
+            highscoresBackgroundReset.draw(0,0);
         }
         
         if(gv.highScore==true){
-            enterNameText.draw(308,101);
-            font.drawString(358,322,name,Color.yellow);
+            highscoresBackgroundName.draw(0,0);
+            fontName.drawString(46,340,name,Color.darkGray);
+        }
+        
+        for(c1=0;c1<10;c1++){
+            fontScore.drawString(398,175+50*c1,String.valueOf(c1+1),Color.darkGray);
+            fontScore.drawString(502,175+50*c1,nameSaved[c1],Color.darkGray);
+            fontScore.drawString(700,175+50*c1,String.valueOf(gv.scoreSaved[c1]),Color.darkGray);
+            fontScore.drawString(947,175+50*c1,String.valueOf(largestSaved[c1]),Color.darkGray);
         }
     }
 
@@ -127,40 +133,40 @@ public class HighScores extends BasicGameState{
         Input input=gc.getInput();
         
         // menu button
-        if(gv.mousePress==false&&resetscoresConfirmationOpen==false&&gv.highScore==false&&input.isMouseButtonDown(0)&&input.getMouseX()>780&&input.getMouseX()<880&&input.getMouseY()>460&&input.getMouseY()<505){
+        if(gv.mousePress==false&&input.isMouseButtonDown(0)&&input.getMouseX()>=50&&input.getMouseX()<=200&&input.getMouseY()>=580&&input.getMouseY()<=620){
             game.enterState(0,new FadeOutTransition(Color.black),new FadeInTransition(Color.black));
         }
         
         // opens reset scores confirmation box
-        if(gv.mousePress==false&&resetscoresConfirmationOpen==false&&gv.highScore==false&&input.isMouseButtonDown(0)&&input.getMouseX()>92&&input.getMouseX()<222&&input.getMouseY()>410&&input.getMouseY()<495){
-            resetscoresConfirmationOpen=true;
+        if(gv.mousePress==false&&resetScoresConfirmation==false&&gv.highScore==false&&input.isMouseButtonDown(0)&&input.getMouseX()>47&&input.getMouseX()<345&&input.getMouseY()>211&&input.getMouseY()<251){
+            resetScoresConfirmation=true;
         }
         
         // reset scores
-        if(gv.mousePress==false&&resetscoresConfirmationOpen==true&&input.isMouseButtonDown(0)&&input.getMouseX()>39&&input.getMouseX()<85&&input.getMouseY()>199&&input.getMouseY()<223){
+        if(gv.mousePress==false&&resetScoresConfirmation==true&&input.isMouseButtonDown(0)&&input.getMouseX()>44&&input.getMouseX()<127&&input.getMouseY()>283&&input.getMouseY()<321){
             try {
                 this.WriteFile=new BufferedWriter(new FileWriter("data\\highScores.txt"));
-                WriteFile.write("DAVID0,30000");WriteFile.newLine();
-                WriteFile.write("DAVID1,25000");WriteFile.newLine();
-                WriteFile.write("DAVID2,20000");WriteFile.newLine();
-                WriteFile.write("DAVID3,17500");WriteFile.newLine();
-                WriteFile.write("DAVID4,15000");WriteFile.newLine();
-                WriteFile.write("DAVID5,12500");WriteFile.newLine();
-                WriteFile.write("DAVID6,10000");WriteFile.newLine();
-                WriteFile.write("DAVID7,7500");WriteFile.newLine();
-                WriteFile.write("DAVID8,5000");WriteFile.newLine();
-                WriteFile.write("DAVID9,2500");
+                WriteFile.write("DAVID0,52304,4096");WriteFile.newLine();
+                WriteFile.write("DAVID1,31012,2048");WriteFile.newLine();
+                WriteFile.write("DAVID2,14428,1024");WriteFile.newLine();
+                WriteFile.write("DAVID3,5124,512");WriteFile.newLine();
+                WriteFile.write("DAVID4,2294,256");WriteFile.newLine();
+                WriteFile.write("DAVID5,668,128");WriteFile.newLine();
+                WriteFile.write("DAVID6,396,64");WriteFile.newLine();
+                WriteFile.write("DAVID7,226,32");WriteFile.newLine();
+                WriteFile.write("DAVID8,78,16");WriteFile.newLine();
+                WriteFile.write("DAVID9,40,8");
                 WriteFile.close();
                 game.enterState(2,new FadeOutTransition(Color.black),new FadeInTransition(Color.black));
             } catch (IOException ex) {
                 Logger.getLogger(HighScores.class.getName()).log(Level.SEVERE, null, ex);
             }
-            resetscoresConfirmationOpen=false;
+            resetScoresConfirmation=false;
         }
         
         // cancel reset scores
-        if(gv.mousePress==false&&resetscoresConfirmationOpen==true&&input.isMouseButtonDown(0)&&input.getMouseX()>170&&input.getMouseX()<259&&input.getMouseY()>199&&input.getMouseY()<223){
-            resetscoresConfirmationOpen=false;
+        if(gv.mousePress==false&&resetScoresConfirmation==true&&input.isMouseButtonDown(0)&&input.getMouseX()>212&&input.getMouseX()<363&&input.getMouseY()>283&&input.getMouseY()<321){
+            resetScoresConfirmation=false;
         }
         
         // type name for high scores
@@ -212,15 +218,15 @@ public class HighScores extends BasicGameState{
                 gv.highScore=false;
                 try {
                     this.WriteFile=new BufferedWriter(new FileWriter("data\\highScores.txt"));
-                    // writes name and scores that are higher than player's
+                    // writes names, scores, and largests that are higher than player's
                     for(c1=0;c1<place;c1++){
-                        WriteFile.write(nameSaved[c1]+","+gv.scoreSaved[c1]);WriteFile.newLine();
+                        WriteFile.write(nameSaved[c1]+","+gv.scoreSaved[c1]+","+largestSaved[c1]);WriteFile.newLine();
                     }
-                    // writes player's name and score
-                    WriteFile.write(name+","+gv.score);WriteFile.newLine();
-                    // writes name and scores that are lower than player's
+                    // writes player's name, score, and largest
+                    WriteFile.write(name+","+gv.score+","+gv.largest);WriteFile.newLine();
+                    // writes names, scores, and largests that are lower than player's
                     for(c1=place;c1<9;c1++){
-                        WriteFile.write(nameSaved[c1]+","+gv.scoreSaved[c1]);WriteFile.newLine();
+                        WriteFile.write(nameSaved[c1]+","+gv.scoreSaved[c1]+","+largestSaved[c1]);WriteFile.newLine();
                     }
                     WriteFile.close();
                 } catch (IOException ex) {
