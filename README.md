@@ -26,4 +26,4 @@ Candy Crush Saga clone reproduced with the Lightweight Java Game Library (LWJGL)
 7. Compile and enjoy!
 
 ## Contact
-If you have any questions or concerns, please feel free to send me an email at zy6zhou@edu.uwaterloo.ca
+If you have any questions or concerns, please feel free to send me an email at zy6zhou@edu.uwaterloo.ca.
