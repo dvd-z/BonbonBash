@@ -10,7 +10,7 @@ Candy Crush Saga clone reproduced with the Lightweight Java Game Library (LWJGL)
 4. In NetBeans under Tools->Libraries->New Library:
     1. Name a new library "slick".
     2. Choose add .jar file.
-    3. Select from the folder slick->lib and choose at least the following:
+    3. Select from the folder slick/lib and choose at least the following:
     ```
     jinput.jar
     lwjgl.jar
@@ -19,7 +19,7 @@ Candy Crush Saga clone reproduced with the Lightweight Java Game Library (LWJGL)
     jogg-0.0.7.jar
     jorbis-0.0.15.jar 
     ```
-5. In NetBeans right click on project, select Properties->Libraries->Add library->Choose slick.
+5. In NetBeans right click on project, select Properties->Libraries->Add library and choose slick.
 6. In NetBeans select RUN and change VM to:
     >-Djava.library.path=C:\...\lwjgl\lwjgl-2.9.1\native\windows
 
